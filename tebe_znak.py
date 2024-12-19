@@ -1,19 +1,24 @@
 import os
 import sys
-import telebot
-import random
-import time
-import json
-from datetime import datetime
 
 # Установка зависимостей
 os.system("pip install -r requirements.txt")
 
+import telebot
+import random
+import time
+import json
+from datetime import datetime, timedelta
+import pytz
+
 # Токен бота и массив каналов
 TOKEN = "7064737344:AAFk4zcdHiEcipfWNCXNWabf70lFJch9LAQ"
 CHAT_IDS = ["-1002290461483", "-1002258674996", "-1002454106093"]
-
 bot = telebot.TeleBot(TOKEN)
+test_mode = True
+
+# Часовой пояс для МСК
+moscow_tz = pytz.timezone("Europe/Moscow")
 
 # Функция для загрузки сообщений из JSON
 def load_messages(channel_index):
@@ -39,26 +44,34 @@ def save_message_history(channel_index, history):
         json.dump({"last_messages": history}, file, ensure_ascii=False, indent=4)
 
 # Функция для выбора уникального сообщения
-def get_unique_message(messages, message_history):
+def get_unique_message(messages, message_history, morning_message=False):
     while True:
         message = random.choice(messages)
+
+        if morning_message:
+            # Утренние сообщения должны содержать слово "сегодня"
+            if "сегодня" not in message.lower():
+                continue
+        else:
+            # В любое другое время сообщения не должны содержать слово "сегодня"
+            if "сегодня" in message.lower():
+                continue
+
         if message not in message_history:
             return message
 
 # Функция отправки сообщения в канал
-def send_message(channel_index, chat_id):
+def send_message(channel_index, chat_id, morning_message=False):
     messages = load_messages(channel_index)
     message_history = load_message_history(channel_index)
-
-    # Получение уникального сообщения
-    message = get_unique_message(messages, message_history)
+    message = get_unique_message(messages, message_history, morning_message)
     formatted_message = f"{message}"
 
     try:
-        bot.send_message(chat_id=chat_id, text=formatted_message)
+        if not test_mode:
+            bot.send_message(chat_id=chat_id, text=formatted_message)
         print(f"Отправлено сообщение в канал {chat_id}:\n{formatted_message}\n")
 
-        # Обновление истории сообщений
         message_history.append(message)
         if len(message_history) > 200:
             message_history.pop(0)
@@ -74,7 +87,24 @@ def send_message(channel_index, chat_id):
 # Основной цикл
 if __name__ == "__main__":
     while True:
-        for index, chat_id in enumerate(CHAT_IDS):
-            send_message(index, chat_id)
-        print("Задержка перед следующей отправкой: 4 часа.")
-        time.sleep(14400)  # 4 часа в секундах
+        now = datetime.now(moscow_tz)
+        current_hour = now.hour
+
+        # Утренние сообщения в 8:00
+        if current_hour == 8:
+            for index, chat_id in enumerate(CHAT_IDS):
+                send_message(index, chat_id, morning_message=True)
+
+        # Дневные сообщения в 14:00
+        elif current_hour == 14:
+            for index, chat_id in enumerate(CHAT_IDS):
+                send_message(index, chat_id, morning_message=False)
+
+        # Вечерние сообщения в 19:00
+        elif current_hour == 19:
+            for index, chat_id in enumerate(CHAT_IDS):
+                send_message(index, chat_id, morning_message=False)
+
+        # Засыпаем до следующего часа
+        print(f"Текущее время: {now.strftime('%H:%M:%S')}. Ждём следующего часа.")
+        time.sleep(3600 - now.minute * 60 - now.second)
