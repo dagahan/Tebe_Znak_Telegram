@@ -3,13 +3,16 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
 
 from collections import deque
-import random, os, sys, inspect, pytz, logging, toml, telebot
+import random, os, sys, inspect, pytz, logging, toml, asyncio, aiogram
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from loguru import logger
 
 # -1002392744548
 
+
+from message_publisher import MessagePublisher
+from telegram_bot import TelegramBot
 
 
 # Setuping the exception handler
@@ -112,55 +115,66 @@ class ZnakPublisherService():
         self.config = ConfigLoader()
         self.scheduler = BlockingScheduler(timezone=pytz.timezone(self.config.get("publisher", "timezone")))
         self.publisher = MessagePublisher()
+        self.hours = None
+        self.minute = None
 
 
     def __getitem__(self, item):
         return getattr(self, item)
     
 
-    def ShowPublisherParams(self):
+    @logger.catch
+    def Run_Service_Message(self):
         if self.config.get("project", "show_publisher_params_on_run"):
             from tabulate import tabulate
 
             table = self.config["publisher"]
 
-            logger.info(f"ZnakPublisherService started with parameters:")
+            logger.info(f"{self.config.get("project", "name")} started with parameters:")
             print(tabulate([table],
                            headers="keys",
                            tablefmt="grid"))
+        else: 
+            logger.info(f"{self.config.get("project", "name")} has been started.")
+
+    
+    @logger.catch
+    def Setup_Messages_Time(self):
+        if self.config.get("project", "debug_mode"):
+            self.hours, self.minute = '8,13,20', '38'
+        else:
+            self.hours, self.minute = '8,13,20', '00'
 
 
     @logger.catch
-    def run_service(self):
+    def Setup_Scheduler(self):
+        try:
+            # self.scheduler.add_job(self.publisher.scheduled_publish, 'interval', seconds=5)
+            self.scheduler.add_job(self.publisher.scheduled_publish, 'cron', hour=self.hours, minute=self.minute)
+            self.scheduler.start()
+        except Exception as error:
+            logger.critical(f"Service's scheduler can't setup: {error}")
+
+
+    @logger.catch
+    def Run_Service(self):
         LogSetup()
-        self.ShowPublisherParams()
+        self.Run_Service_Message()
+        self.Setup_Messages_Time()
+        self.Setup_Scheduler()
+
+
         
-        
-
-        # 3 раза в сутки: 8:00, 14:00, 20:00 (МСК)
-        # scheduler.add_job(scheduled_publish, 'cron', hour='8,14,20')
-
-        self.scheduler.add_job(self.publisher.scheduled_publish, 'interval', seconds=5)
-        self.scheduler.start()
-
-
-
-class MessagePublisher():
-        @logger.catch
-        def scheduled_publish(self):
-            logger.info("Scheduled publish job started")
-            # publisher = MessagePublisher()
-            # publisher.publish_all()
 
 
 
 
 
-if __name__ == "__main__":
-    try:
-        ZnakPublisherService().run_service()
-    except KeyboardInterrupt:
-        logger.info("Service stopped by user")
-    except Exception as error:
-        logger.critical(f"Service crashed: {error}")
-        sys.exit(1)
+
+
+
+
+
+
+
+
