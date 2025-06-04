@@ -1,17 +1,9 @@
-import os
-import sys
-
-# Установка зависимостей
-os.system("pip install -r requirements.txt")
-
-import telebot
-import random
-import time
-import json
+import os, sys, telebot, random, time, json, pytz
 from datetime import datetime, timedelta
-import pytz
 
-# Токен бота и массив каналов
+
+
+
 TOKEN = "7064737344:AAFk4zcdHiEcipfWNCXNWabf70lFJch9LAQ"
 CHAT_IDS = ["-1002290461483", "-1002258674996", "-1002454106093"]
 bot = telebot.TeleBot(TOKEN)
@@ -19,11 +11,15 @@ test_mode = False
 
 moscow_tz = pytz.timezone("Europe/Moscow")
 
+
+
 def load_messages(channel_index):
     file_path = f"data/{channel_index}/messages.json"
     with open(file_path, "r", encoding="utf-8") as file:
         data = json.load(file)
         return data["messages"]
+
+
 
 def load_message_history(channel_index):
     history_file = f"data/{channel_index}/message_history.json"
@@ -32,6 +28,7 @@ def load_message_history(channel_index):
             return json.load(file).get("last_messages", [])
     except FileNotFoundError:
         return []
+
 
 
 def save_message_history(channel_index, history):
@@ -81,6 +78,8 @@ def send_message(channel_index, chat_id, morning_message=False):
             time.sleep(retry_after)
         else:
             print(f"Ошибка отправки сообщения в канал {chat_id}: {e}")
+
+
 
 
 if __name__ == "__main__":
