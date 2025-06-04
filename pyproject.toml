@@ -15,15 +15,30 @@ show_publisher_params_on_run = true
 debug_mode = true
 
 
+
 [publisher]
+retry_count = 10
+retry_delay = 30
+
+
+
+[scheduler]
 timezone = "Europe/Moscow"
 post_hours = "8, 14, 20"
 post_minutes = "00"
+
+
+
+[msg_construct]
+max_history = 200
+
+
+
+[telegram_bot]
 bot_token = "7064737344:AAFk4zcdHiEcipfWNCXNWabf70lFJch9LAQ"
 channels_ids = ["-1002392744548"]
-max_history = 200
-retry_count = 10
-retry_delay = 30
+
+
 
 # TODO: хранить айди телеграмм каналов в sqlite с подпиской названий.
 
