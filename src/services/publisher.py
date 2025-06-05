@@ -32,7 +32,7 @@ class MessagePublisher:
         logger.info("Starting scheduled publish")
 
         # load all list of names and do method for every active name
-        self.publish_for_name("Жопка")
+        self.publish_for_name("Настя")
 
 
         

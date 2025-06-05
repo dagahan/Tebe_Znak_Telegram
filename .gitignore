@@ -200,6 +200,7 @@ debug/
 tmp/
 **/uv.lock
 **/*.log
+**/message_history.json
 
 
 
