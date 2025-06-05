@@ -2,17 +2,52 @@
 name = "tebe_znak_telegram"
 version = "0.1.3"
 dependencies = [
-    "pyTelegramBotAPI==4.10.0",
+    "loguru==0.7.3",
+    "toml==0.10.2",
+    "aiogram",
     "pytz==2025.2",
     "pigar",
     "sqlalchemy",
-    "python-telegram-bot",
     "apscheduler",
+    "tabulate",
+    "chardet",
+    "pyTelegramBotAPI",
 ]
+show_publisher_params_on_run = true
+debug_mode = true
 
 
-[tokens]
+
+[publisher]
+retry_count = 10
+retry_delay = 30
+
+
+
+[scheduler]
+timezone = "Europe/Moscow"
+post_hours = "8, 14, 20"
+post_minutes = "00"
+
+
+
+[msg_construct]
+data_path = "data"
+message_history = "message_history.json"
+messages = "message.json"
+max_history = 200
+artifact = "%name%"
+
+
+
+[telegram_bot]
 bot_token = "7064737344:AAFk4zcdHiEcipfWNCXNWabf70lFJch9LAQ"
-channels_ids = ["-1002290461483", "-1002258674996", "-1002454106093"]
+channels_ids = ["-1002392744548"]
+admins_ids = ["1051917971", "6406151982"]
+
+
 
 # TODO: хранить айди телеграмм каналов в sqlite с подпиской названий.
+
+#TODO: Конструктор сообщений. Берёт список шаблонных сообщений, где спец символы заменяются на указанное имя для соответствующего канала.
+#TODO: Должно быть два шаблона: для женщин и для мужчин.
