@@ -4,6 +4,7 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from core.config import ConfigLoader
 from services.publisher import MessagePublisher
 from services.telegram_bot import TelegramService
+from core.database import DataBase
 
 
 
@@ -13,6 +14,7 @@ class SchedulerService:
         self.config = ConfigLoader()
         self.service_name = self.config.get("project", "name")
         self.publisher = MessagePublisher()
+        self.data_base = DataBase()
         self.scheduler = BlockingScheduler(timezone=pytz.timezone(self.config.get("scheduler", "timezone")))
         self.stop_event = threading.Event()
         self.hours = self.config.get("scheduler", "post_hours")
@@ -79,6 +81,7 @@ class SchedulerService:
 
 
     def run_service(self):
+        self.data_base.create_base_structure()
         self.setup_jobs()
         self.service_start_message()
    
