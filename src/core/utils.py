@@ -1,5 +1,6 @@
-import os, json
+import os, json, chardet
 from loguru import logger
+from typing import List
 
 
 
@@ -13,6 +14,7 @@ class DockerTools:
         except KeyError:
             ()
         return False
+
 
 
 class JsonLoader:
@@ -40,3 +42,19 @@ class JsonLoader:
                 json.dump(data, file, ensure_ascii=False, indent=4)
         except Exception as e:
             logger.error(f"Error writing JSON file {path}: {e}")
+
+
+
+class Filters:
+    @staticmethod
+    def filter_strings(list1: List[str], list2: List[str]) -> List[str]:
+        set2 = set(list2)
+        return [s for s in list1 if s not in set2]
+    
+
+    @staticmethod
+    def personalized_line(line, artifact, name):
+        person_line = line.replace(artifact, name)
+        return person_line
+            
+        

@@ -10,6 +10,8 @@ dependencies = [
     "sqlalchemy",
     "apscheduler",
     "tabulate",
+    "chardet",
+    "pyTelegramBotAPI",
 ]
 show_publisher_params_on_run = true
 debug_mode = true
@@ -30,13 +32,18 @@ post_minutes = "00"
 
 
 [msg_construct]
+data_path = "data"
+message_history = "message_history.json"
+messages = "message.json"
 max_history = 200
+artifact = "%name%"
 
 
 
 [telegram_bot]
 bot_token = "7064737344:AAFk4zcdHiEcipfWNCXNWabf70lFJch9LAQ"
 channels_ids = ["-1002392744548"]
+admins_ids = ["1051917971", "6406151982"]
 
 
 
