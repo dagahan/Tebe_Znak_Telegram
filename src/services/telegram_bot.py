@@ -7,7 +7,7 @@ from core.utils import EnvTools, MethodTools
 from aiogram import Bot, Dispatcher, html
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart
+from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 
 
@@ -20,23 +20,14 @@ class TelegramService():
         self.method_tools = MethodTools()
         self.bot_token = self.env_tools.load_env_var("bot_token")
         self.admin_id = self.env_tools.load_env_var("admin_id")
-        self.telegram_bot = Bot(token=self.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-        self.loop = loop or asyncio.get_event_loop()
         self.bot = Bot(
             token=self.bot_token,
             default=DefaultBotProperties(parse_mode=ParseMode.HTML),
-            loop=self.loop
+            loop=loop or asyncio.get_event_loop()
         )
         self.dp = Dispatcher()
-
-        @self.dp.message(CommandStart())
-        async def cmd_start_handler(message: Message):
-            await message.answer("Привет! Бот запущен и готов к работе.")
-
         self._stop_event = asyncio.Event()
         
-
-    
 
     @logger.catch
     async def start_bot(self):
@@ -58,4 +49,4 @@ class TelegramService():
         try:
             await self.bot.send_message(tg_id, message)
         except Exception as ex:
-            logger.error(f"There is an error with {self.method_tools.name_of_method()}")
+            logger.error(f"There is an error with {self.method_tools.name_of_method()}: {ex}")
