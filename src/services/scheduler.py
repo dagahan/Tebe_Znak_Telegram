@@ -13,16 +13,17 @@ class SchedulerService:
     def __init__(self):
         self.config = ConfigLoader()
         self.service_name = self.config.get("project", "name")
-        self.publisher = MessagePublisher()
         self.data_base = DataBase()
         self.scheduler = BlockingScheduler(timezone=pytz.timezone(self.config.get("scheduler", "timezone")))
         self.stop_event = threading.Event()
         self.hours = self.config.get("scheduler", "post_hours")
         self.minutes = self.config.get("scheduler", "post_minutes")
         
-
+        self.bot_loop = asyncio.new_event_loop()
+        self.telegram_service = TelegramService(loop=self.bot_loop)
+        self.publisher = MessagePublisher(self.telegram_service)
+        
         self.bot_thread = None
-        self.telegram_service = None
 
 
     def service_start_message(self):
@@ -71,14 +72,9 @@ class SchedulerService:
 
 
     def _run_telegram_bot_loop(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        self.telegram_service = TelegramService(loop=loop)
-        task = loop.create_task(self.telegram_service.start_bot())
-
         try:
-            loop.run_until_complete(task)
+            asyncio.set_event_loop(self.bot_loop)
+            self.bot_loop.run_until_complete(self.telegram_service.start_bot())
         except Exception as e:
             logger.error(f"{colorama.Fore.RED}Telegram bot crashed: {e}")
     
