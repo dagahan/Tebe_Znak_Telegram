@@ -14,7 +14,7 @@ dependencies = [
     "pyTelegramBotAPI",
 ]
 show_publisher_params_on_run = true
-debug_mode = true
+debug_mode = false
 
 
 

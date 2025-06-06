@@ -16,8 +16,7 @@ class TelegramService():
         self.bot_token = self.config.get("telegram_bot", "bot_token")
         self.chat_ids = self.config.get("telegram_bot", "channels_ids")
         self.telegram_bot = Bot(token=self.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-
-        self.loop = loop
+        self.loop = loop or asyncio.get_event_loop()
         self.bot = Bot(
             token=self.bot_token,
             default=DefaultBotProperties(parse_mode=ParseMode.HTML),
@@ -46,3 +45,8 @@ class TelegramService():
 
         await self.bot.session.close()
         logger.info("Telegram bot stopped gracefully")
+
+
+    @logger.catch
+    async def send_message(self, tg_id, message):
+        await self.bot.send_message(tg_id, message)
