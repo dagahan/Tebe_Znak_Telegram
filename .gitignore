@@ -201,6 +201,8 @@ tmp/
 **/uv.lock
 **/*.log
 **/message_history.json
+**/.env
+**database.db
 
 
 

@@ -1,6 +1,8 @@
-import toml
+import tomllib
 import os
 from loguru import logger
+
+
 
 class ConfigLoader:
     __instance = None # char " _ " is used to indicate that this is a private variable
@@ -17,8 +19,8 @@ class ConfigLoader:
     @classmethod
     def _load(cls):
         try:
-            with open("pyproject.toml", "r") as f:
-                cls.__config = toml.load(f)
+            with open("pyproject.toml", "rb") as f:
+                cls.__config = tomllib.load(f)
             os.environ["CONFIG_LOADED"] = "1"
         except Exception as error:
             logger.critical("Config load failed: {error}", error=error)
