@@ -1,9 +1,10 @@
-import pytz, asyncio, threading, signal
+import pytz, asyncio, threading, signal, colorama
 from loguru import logger
 from apscheduler.schedulers.blocking import BlockingScheduler
 from core.config import ConfigLoader
 from services.publisher import MessagePublisher
 from services.telegram_bot import TelegramService
+from core.database import DataBase
 
 
 
@@ -13,6 +14,7 @@ class SchedulerService:
         self.config = ConfigLoader()
         self.service_name = self.config.get("project", "name")
         self.publisher = MessagePublisher()
+        self.data_base = DataBase()
         self.scheduler = BlockingScheduler(timezone=pytz.timezone(self.config.get("scheduler", "timezone")))
         self.stop_event = threading.Event()
         self.hours = self.config.get("scheduler", "post_hours")
@@ -57,10 +59,14 @@ class SchedulerService:
 
     def handle_sigint(self, signum, frame):
         try:
+            logger.info(f"{colorama.Fore.CYAN}{self.service_name} shutdown initiated.")
             self.scheduler.shutdown(wait=False)
-            logger.info("Scheduler shutdown initiated")
+            # self.data_base.gracefully_stop()
+            # self.publisher.data_base.gracefully_stop()
+
         except Exception as e:
-            logger.error(f"Error during scheduler shutdown: {e}")
+            logger.error(f"{colorama.Fore.RED}Error during {self.service_name} shutdown: {e}.")
+
         self.stop_event.set() # here we set the stop event to signal the bot thread to stop
 
 
@@ -74,11 +80,12 @@ class SchedulerService:
         try:
             loop.run_until_complete(task)
         except Exception as e:
-            logger.error(f"Telegram bot crashed: {e}")
+            logger.error(f"{colorama.Fore.RED}Telegram bot crashed: {e}")
     
 
 
     def run_service(self):
+        self.data_base.test_db()
         self.setup_jobs()
         self.service_start_message()
    
@@ -95,6 +102,6 @@ class SchedulerService:
             self.scheduler.start()
         finally:
             if self.bot_thread.is_alive():
-                logger.info("Waiting for Telegram bot to shutdown...")
+                logger.info(f"{colorama.Fore.CYAN}Waiting for Telegram bot to shutdown...")
                 self.bot_thread.join(timeout=3)
-            logger.info(f"Service '{self.service_name}' gracefully stopped")
+            logger.info(f"{colorama.Fore.CYAN}Service '{self.service_name}' gracefully stopped")
