@@ -12,6 +12,7 @@ from aiogram.types import Message
 
 
 
+
 class TelegramService():
     def __init__(self, loop: asyncio.AbstractEventLoop):
         self.config = ConfigLoader()

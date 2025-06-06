@@ -19,12 +19,12 @@ class MessagePublisher:
         self.time_zone = pytz.timezone(self.config.get("scheduler", "timezone"))
 
     
-    def publish_for_name(self, data_name):
+    def publish_for_name(self, data_name, type):
         self.id, self.tg_id, self.name = data_name
-        posting_message = self.constructor.construct_message(self.name)
+        posting_message = self.constructor.construct_message(self.name, type)
 
         if posting_message:
-            logger.info(f"Constructed message for {self.name}: {posting_message}")
+            logger.info(f"Constructed message for {self.name} with type '{type}': {posting_message}")
             try:
                 asyncio.run_coroutine_threadsafe(
                     self.telegram_service.send_message(self.tg_id, posting_message),
@@ -36,10 +36,10 @@ class MessagePublisher:
             logger.error(f"Failed to construct message for publishing")
 
 
-    def publish_for_names(self, names_list):
+    def publish_for_names(self, names_list, type):
         try:
             for data_name in names_list:
-                self.publish_for_name(data_name)
+                self.publish_for_name(data_name, type)
 
         except Exception as ex:
             logger.error(f"error with publishing for every name: {ex}")
@@ -50,10 +50,6 @@ class MessagePublisher:
 
         match self.config.get("project", "debug_mode"):
             case True:
-                self.publish_for_name((self.env_tools.load_env_var("test_id"), self.env_tools.load_env_var("test_tg_id"), self.env_tools.load_env_var("test_name")))
+                self.publish_for_name((self.env_tools.load_env_var("test_id"), self.env_tools.load_env_var("test_tg_id"), self.env_tools.load_env_var("test_name")), self.env_tools.load_env_var("test_msg_type"))
             case default:
                 self.publish_for_names(self.data_base.get_channels())
-
-        
-
-

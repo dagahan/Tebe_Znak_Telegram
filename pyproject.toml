@@ -13,7 +13,7 @@ dependencies = [
     "colorama==0.4.6",
 ]
 show_publisher_params_on_run = true
-debug_mode = true
+debug_mode = false
 
 
 
@@ -28,7 +28,7 @@ post_minutes = "00"
 data_path = "data"
 message_history = "message_history.json"
 messages = "message.json"
-max_history = 200
+max_history = 350
 artifact = "%name%"
 
 
