@@ -1,4 +1,4 @@
-import sys, inspect, logging
+import sys, inspect, logging, colorama
 sys.path.insert(0, './src')
 from services.scheduler import SchedulerService
 from loguru import logger
@@ -56,7 +56,7 @@ if __name__ == "__main__":
         service = SchedulerService()
         service.run_service()
     except KeyboardInterrupt:
-        logger.info("Service stopped by user")
+        logger.info(f"{colorama.Fore.CYAN}Service stopped by user")
     except Exception as error:
-        logger.critical(f"Service crashed: {error}")
+        logger.critical(f"{colorama.Fore.RED}Service crashed: {error}")
         sys.exit(1)
