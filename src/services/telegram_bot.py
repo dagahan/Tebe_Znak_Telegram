@@ -32,6 +32,7 @@ class TelegramService():
         self._stop_event = asyncio.Event()
     
 
+    @logger.catch
     async def start_bot(self):
         logger.info("Starting Telegram bot polling")
         polling_task = asyncio.create_task(self.dp.start_polling(self.bot))
