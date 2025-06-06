@@ -71,8 +71,9 @@ class MessageConstructor:
         self._save_history()
 
 
-    def pick_random_message(self, name):
-        messages_list = self.json_loader.readJson(self.message_file)["messages"]
+    def pick_random_message(self, name, type):
+        messages_list = self.json_loader.readJson(self.message_file)[type]
+        
         try:
             messages_history_list = self.json_loader.readJson(self.message_history_file)[name]
             available_messages = self.filters.filter_strings(messages_list, messages_history_list)
@@ -85,11 +86,11 @@ class MessageConstructor:
             return False
  
 
-    def construct_message(self, name):
+    def construct_message(self, name, type):
         message = None
 
         for _ in range(5):
-            candidate = self.pick_random_message(name)
+            candidate = self.pick_random_message(name, type)
             if candidate:
                 message = candidate
                 break

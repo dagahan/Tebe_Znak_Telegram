@@ -1,6 +1,7 @@
-import os, sqlite3, colorama
+import sqlite3, colorama
 from loguru import logger
 from core.config import ConfigLoader
+
 
 
 
@@ -9,10 +10,6 @@ class DataBase():
         self.config = ConfigLoader()
         self.db_path = self.config.get("database", "file_path")
         
-
-        # self.SQL_request("PRAGMA foreign_keys = ON")
-
-
 
     @logger.catch
     def SQL_request(self, request, params=()):
