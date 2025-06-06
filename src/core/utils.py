@@ -1,18 +1,46 @@
-import os, json, chardet
+import os, json, chardet, inspect
 from loguru import logger
 from typing import List
+from dotenv import load_dotenv
 
 
 
 
-class DockerTools:
+class MethodTools:
+    def __init__(self):
+        pass
+
+
+    @staticmethod
+    def name_of_method(one=+1, two=3):
+        try:
+            return inspect.stack()[one][3]
+        except Exception as ex:
+            logger.error(f"There is an error with checking your method's name: {ex}")
+            return "Unknown Method"
+
+
+
+class EnvTools:
+    def __init__(self):
+        load_dotenv()
+
+
+    @staticmethod
+    def load_env_var(variable_name):
+        try:
+            return os.getenv(variable_name)
+        except Exception as ex:
+            logger.critical(f"Error with {inspect.stack()[0][3]}\n{ex}")
+            return None
+        
     @staticmethod
     def is_running_inside_docker():
         try:
-            if os.environ['RUNNING_INSIDE_DOCKER'] == "1":
+            if EnvTools.load_env_var('RUNNING_INSIDE_DOCKER') == "1":
                 return True
-        except KeyError:
-            ()
+        except KeyError as ex:
+            logger.error(f"Error with {inspect.stack()[0][3]}. Returns default 'False'\n{ex}")
         return False
 
 
@@ -56,5 +84,3 @@ class Filters:
     def personalized_line(line, artifact, name):
         person_line = line.replace(artifact, name)
         return person_line
-            
-        
