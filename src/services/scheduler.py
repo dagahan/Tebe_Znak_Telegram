@@ -17,7 +17,6 @@ class SchedulerService:
         self.scheduler = BlockingScheduler(timezone=pytz.timezone(self.config.get("scheduler", "timezone")))
         self.stop_event = threading.Event()
         self.hours = self.config.get("scheduler", "post_hours")
-        self.minutes = self.config.get("scheduler", "post_minutes")
         
         self.bot_loop = asyncio.new_event_loop()
         self.telegram_service = TelegramService(loop=self.bot_loop)
@@ -42,28 +41,47 @@ class SchedulerService:
                 logger.info(f"{self.service_name} started successfully!")
 
 
+    def get_period_of_day(self, hour):
+        try:
+            if 6 <= hour < 12:
+                return 'morning'
+            elif 12 <= hour < 18:
+                return 'day'
+            else:
+                return 'evening'   
+                    
+        except Exception as ex:
+            logger.critical(f"{colorama.Fore.RED}There is an error with checking type of posting message: {ex}") 
+
+
     def setup_jobs(self):
         match self.config.get("project", "debug_mode"):
             case True:
-                self.scheduler.add_job(self.publisher.scheduled_publish,'interval',seconds=5)
+                period_type = self.get_period_of_day(14)
+                self.scheduler.add_job(
+                    lambda: self.publisher.scheduled_publish(period_type),
+                    'interval',
+                    seconds=5
+                )
                 logger.warning("Running in DEBUG mode")
 
             case default:
-                self.scheduler.add_job(
-                        self.publisher.scheduled_publish,
-                        'cron',
-                        hour=self.hours,
-                        minute=self.minutes,)
-                logger.info(f"Job scheduled: {self.hours}:{self.minutes}")
-                    
+                for picked_hour in self.hours:
+                    pub_time = str(picked_hour).split(":")
+                    type = self.get_period_of_day(int(pub_time[0]))
+                    self.scheduler.add_job(
+                            lambda pt=type: self.publisher.scheduled_publish(pt),
+                            'cron',
+                            hour=pub_time[0],
+                            minute=pub_time[1],
+                            )
+                    logger.info(f"Job scheduled: {picked_hour}")
 
 
     def handle_sigint(self, signum, frame):
         try:
             logger.info(f"{colorama.Fore.CYAN}{self.service_name} shutdown initiated.")
             self.scheduler.shutdown(wait=False)
-            # self.data_base.gracefully_stop()
-            # self.publisher.data_base.gracefully_stop()
 
         except Exception as e:
             logger.error(f"{colorama.Fore.RED}Error during {self.service_name} shutdown: {e}.")
@@ -81,7 +99,7 @@ class SchedulerService:
 
 
     def run_service(self):
-        self.data_base.test_db()
+        self.data_base.setup()
         self.setup_jobs()
         self.service_start_message()
    

@@ -19,8 +19,7 @@ debug_mode = false
 
 [scheduler]
 timezone = "Europe/Moscow"
-post_hours = "8, 14, 20"
-post_minutes = "00"
+post_hours = ['8:00', '14:00', '20:00']
 
 
 
@@ -34,11 +33,5 @@ artifact = "%name%"
 
 
 [database]
-file_path = "database/database.db"
-
-
-
-# TODO: хранить айди телеграмм каналов в sqlite с подпиской названий.
-
-#TODO: Конструктор сообщений. Берёт список шаблонных сообщений, где спец символы заменяются на указанное имя для соответствующего канала.
-#TODO: Должно быть два шаблона: для женщин и для мужчин.
+file_path = "database/"
+file_name = "database.db"

@@ -17,14 +17,9 @@ class MessageConstructor:
         self.data_path = self.config.get("msg_construct", "data_path")
         self.messages = self.config.get("msg_construct", "messages")
         self.message_history = self.config.get("msg_construct", "message_history")
-        
         self.message_file = f"{self.data_path}/{self.messages}"
         self.message_history_file = f"{self.data_path}/{self.message_history}"
-
         self.history = self._load_history()
-
-
-    #TODO: ALL OF THIS WILL BE WORK WITH SQL DATABASE IN FUTURE
     
 
     def _load_history(self):
