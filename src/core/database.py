@@ -1,6 +1,7 @@
 import sqlite3, colorama
 from loguru import logger
 from core.config import ConfigLoader
+from core.utils import EnvTools
 
 
 
@@ -8,13 +9,15 @@ from core.config import ConfigLoader
 class DataBase():
     def __init__(self):
         self.config = ConfigLoader()
+        self.env_tools = EnvTools()
         self.db_path = self.config.get("database", "file_path")
+        self.db_name = self.config.get("database", "file_name")
         
 
     @logger.catch
     def SQL_request(self, request, params=()):
         try:
-            self.connect = sqlite3.connect(self.db_path)
+            self.connect = sqlite3.connect(f"{self.db_path}{self.db_name}")
             self.cursor = self.connect.cursor()
 
             self.cursor.execute(request, params)
@@ -62,17 +65,16 @@ class DataBase():
     def get_channels(self):
         result = self.SQL_request("""SELECT * FROM channels""")
         return result
-    
-
-    # def gracefully_stop(self):
-    #     if hasattr(self.local, "connection") and self.local.connection:
-    #         self.local.connection.close()
-    #         logger.info("Connection gracefully closed")
 
 
 
-    def test_db(self):
-        # self.create_base_structure()
+    def setup(self):
+        if not self.env_tools.is_file_exist(self.db_path, self.db_name):
+            logger.debug("creating db...")
+            self.env_tools.create_file_in_directory(self.db_path, self.db_name)
+            logger.debug("db has been created... Now creating base structure of it,")
+            self.create_base_structure()
+            logger.critical(f"{colorama.Fore.GREEN}Great! Database of channels now done, please insert your data into it and run program again!")
         
         # self.insert_channel(
         #     tg_id="-1002392744548",

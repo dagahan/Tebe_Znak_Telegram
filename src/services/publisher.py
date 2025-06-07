@@ -45,11 +45,11 @@ class MessagePublisher:
             logger.error(f"error with publishing for every name: {ex}")
 
 
-    def scheduled_publish(self):
+    def scheduled_publish(self, type):
         logger.info("Starting scheduled publish")
 
         match self.config.get("project", "debug_mode"):
             case True:
-                self.publish_for_name((self.env_tools.load_env_var("test_id"), self.env_tools.load_env_var("test_tg_id"), self.env_tools.load_env_var("test_name")), self.env_tools.load_env_var("test_msg_type"))
+                self.publish_for_name((self.env_tools.load_env_var("test_id"), self.env_tools.load_env_var("test_tg_id"), self.env_tools.load_env_var("test_name")), type)
             case default:
-                self.publish_for_names(self.data_base.get_channels())
+                self.publish_for_names(self.data_base.get_channels(), type)

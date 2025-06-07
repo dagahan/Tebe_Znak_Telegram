@@ -42,6 +42,18 @@ class EnvTools:
         except KeyError as ex:
             logger.error(f"Error with {inspect.stack()[0][3]}. Returns default 'False'\n{ex}")
         return False
+    
+
+    @staticmethod
+    def is_file_exist(directory, file):
+        return os.path.exists(os.path.join(os.getcwd(), directory, file))
+
+
+    @staticmethod
+    def create_file_in_directory(dir, file):
+        os.makedirs(dir)
+        with open(dir+file, 'w') as newfile:
+            newfile.write("")
 
 
 

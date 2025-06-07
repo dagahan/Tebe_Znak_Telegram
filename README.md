@@ -34,7 +34,6 @@ admin_id=your_tg_id
 test_id=1
 test_tg_id="tg_channel_id_to_test"
 test_name="your_test_name"
-test_msg_type="evening"
 ```
 
 And now simply run these service!
