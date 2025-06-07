@@ -36,7 +36,27 @@ test_tg_id="tg_channel_id_to_test"
 test_name="your_test_name"
 ```
 
-And now simply run these service!
+Then simply run these service and get an error:
+
+```bash
+uv sync && uv run startup.py
+
+21:20:24 | CRITICAL | core.database:setup:77 - Great! Database of channels now done, please insert your data into it and run program again!
+```
+
+It means database of channels has been created at database/database.db
+You need to enter your data into it.
+To do so, use command:
+
+```bash
+sudo apt install sqlite3
+sqlite3 database.db "INSERT INTO channels (tg_id, name) VALUES 
+('tg_id', 'Jane'),
+('tg_id', 'Masha'),
+('tg_id', 'Rose');"
+```
+
+And finally you can run these service for usage:
 
 ```bash
 uv sync && uv run startup.py
