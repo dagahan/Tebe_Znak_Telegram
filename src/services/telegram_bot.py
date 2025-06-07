@@ -20,6 +20,7 @@ class TelegramService():
         self.method_tools = MethodTools()
         self.bot_token = self.env_tools.load_env_var("bot_token")
         self.admin_id = self.env_tools.load_env_var("admin_id")
+        self.loop = loop or asyncio.get_event_loop()
         self.bot = Bot(
             token=self.bot_token,
             default=DefaultBotProperties(parse_mode=ParseMode.HTML),
